@@ -1,47 +1,73 @@
-import dash
+# index page
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
-from pages import index
-from pages import page_1
-from pages import page_2
-import navbar
 import dash_bootstrap_components as dbc
+from dash.dependencies import Input, Output, State
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+from server import app, server
+#from flask_login import logout_user, current_user
 
-app.config.suppress_callback_exceptions = True
+import pandas as pd
+import plotly.express as px
 
-app.layout = html.Div([
-    navbar.navbar,
-    dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content')
-])
+# app pages
+from pages import (
+    home,
+    page1,
+    page2,
+)
 
-# Page 1 callback
-@app.callback(dash.dependencies.Output('page-1-content', 'children'),
-              [dash.dependencies.Input('page-1-dropdown', 'value')])
-def page_1_dropdown(value):
-    return 'You have selected "{}"'.format(value)
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Home", href="/home")),
+        dbc.NavItem(dbc.NavLink("Page 1", href="/page1")),
+        dbc.NavItem(dbc.NavLink("Page 2", href="/page2")),
+    ],
+    brand="Titolo NavBar",
+    brand_href="/",
+    color="primary",
+    dark=True,
+)
 
-# Page 2
-@app.callback(Output('page-2-content', 'children'),
-              [Input('page-2-radios', 'value')])
-def page_2_radios(value):
-    return 'You have selected "{}"'.format(value)
+df = pd.DataFrame({
+    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
+    "Amount": [4, 1, 2, 2, 4, 5],
+    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
+})
 
-# Index Page callback
-@app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
-def display_page(pathname):
-    if pathname == '/page-1':
-        return page_1.page_1_layout
-    elif pathname == '/page-2':
-        return page_2.page_2_layout
-    elif pathname == '/':
-        return index.index_page
-    else:
-        return '404'
+app.layout = html.Div(
+    [
+        #header,
+        navbar,
+        html.Br(),
+        html.Div(
+            [
+                dbc.Container(
+                    id='page-content'
+                )
+            ]
+        ),
+        dcc.Location(id='base-url', refresh=False),
+    ]
+)
+
+
+@app.callback(
+    Output('page-content', 'children'),
+    [Input('base-url', 'pathname')])
+def router(pathname):
+    '''
+    routes to correct page based on pathname
+    '''
+    print('routing shit to',pathname)
+
+    # app pages
+    if pathname == '/' or pathname=='/home' or pathname=='/home':
+        return home.layout()
+    elif pathname == '/page1' or pathname=='/page1':
+        return page1.layout()
+    elif pathname == '/page2' or pathname=='/page2':
+        return page2.layout()
 
 
 if __name__ == '__main__':
