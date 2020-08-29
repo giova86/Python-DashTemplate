@@ -8,6 +8,7 @@ import random
 
 app = dash.Dash(
     __name__,
+    update_title=None,
     external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
 
